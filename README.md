@@ -1,2 +1,0 @@
-# swywdct.github.io
-Hello!
