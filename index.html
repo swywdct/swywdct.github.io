@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主页</title>
+    <style>
+        /* 基础样式与毛玻璃背景 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* 主容器 - 毛玻璃效果 */
+        .glass-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            margin: 20px 0;
+        }
+
+        /* 头部信息 */
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        /* 毛玻璃按钮区域 */
+        .buttons-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        /* 单个毛玻璃按钮样式 */
+        .glass-button {
+            flex: 1;
+            min-width: 200px;
+            max-width: 220px;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-button i {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+        }
+
+        /* 按钮悬停效果 */
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 按钮激活点击效果 */
+        .glass-button:active {
+            transform: translateY(-2px);
+            transition: transform 0.1s;
+        }
+
+        /* 页脚 */
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 30px 20px;
+            }
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            .buttons-section {
+                gap: 20px;
+            }
+            .glass-button {
+                min-width: 100%;
+            }
+        }
+    </style>
+    <!-- 引入Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="glass-container">
+        <div class="header">
+            
+        </div>
+
+        <div class="buttons-section">
+            <!-- 毛玻璃按钮示例 1 -->
+            <a href="#" class="glass-button">
+                <i class="fas fa-user-circle"></i>
+                <span></span>
+            </a>
+            <!-- 毛玻璃按钮示例 2 -->
+            <a href="#" class="glass-button">
+                <i class="fas fa-project-diagram"></i>
+                <span></span>
+            </a>
+            <!-- 毛玻璃按钮示例 3 -->
+            <a href="#" class="glass-button">
+                <i class="fas fa-file-alt"></i>
+                <span></span>
+            </a>
+            <!-- 毛玻璃按钮示例 4 -->
+            <a href="#" class="glass-button">
+                <i class="fas fa-envelope"></i>
+                <span></span>
+            </a>
+        </div>
+
+        <div class="footer">
+            
+        </div>
+    </div>
+
+    <script>
+        // 为所有毛玻璃按钮添加简单的点击交互反馈
+        document.querySelectorAll('.glass-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // 阻止默认链接跳转（示例中链接为#），在实际使用时请替换为真实URL
+                if(this.getAttribute('href') === '#') {
+                }
+            });
+        });
+    </script>
+</body>
+</html>
