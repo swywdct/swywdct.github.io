@@ -58,6 +58,11 @@ const posts = (await getCollection('blog')).sort(
 				color: rgb(var(--gray-dark));
 				font-size: 1rem;
 			}
+			.series {
+				margin: 0 0 0.35rem;
+				color: rgb(var(--accent));
+				font-size: 0.9rem;
+			}
 			ul li a:hover .title,
 			ul li a:hover .date {
 				color: rgb(var(--accent));
@@ -82,6 +87,12 @@ const posts = (await getCollection('blog')).sort(
 							<li>
 								<a href={`/blog/${post.id}/`}>
 									<h2 class="title">{post.data.title}</h2>
+									{post.data.series && (
+										<p class="series">
+											{post.data.series}
+											{post.data.seriesOrder !== undefined && ` · 第 ${post.data.seriesOrder} 篇`}
+										</p>
+									)}
 									<p class="date">
 										<FormattedDate date={post.data.pubDate} />
 									</p>
