@@ -1,3 +1,9 @@
+---
+title: 'Tokio mini-redis learning'
+description: '从零读懂 Tokio mini-redis：用 Rust 构建一个异步 Redis。'
+pubDate: '2026-07-29'
+---
+
 # 从零读懂 Tokio mini-redis：用 Rust 构建一个异步 Redis
 
 > 本文是一篇面向学习者的源码导读，基于当前仓库中的 `mini-redis` 实现编写。
