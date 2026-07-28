@@ -1,6 +1,6 @@
 ---
 title: 'Rust 三个 CLI 练手项目'
-description: '使用 Rust 实现批量重命名和 Markdown 转 HTML 两个命令行工具。'
+description: '使用 Rust 实现批量重命名和 Markdown 转 HTML 和端口扫描三个命令行工具。'
 pubDate: '2026-07-23'
 ---
 
