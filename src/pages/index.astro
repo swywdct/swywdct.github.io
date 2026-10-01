@@ -11,23 +11,23 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
 			main {
-				width: min(100%, 520px);
+				width: min(100%, 860px);
 				padding-top: 2rem;
 				padding-bottom: 2rem;
 			}
 			.game-shell {
 				display: grid;
-				grid-template-columns: minmax(0, 220px) auto;
+				grid-template-columns: minmax(0, 360px) minmax(180px, 220px);
 				justify-content: center;
 				gap: 0.75rem;
 				align-items: start;
 			}
 			.board {
 				display: grid;
-				grid-template-columns: repeat(4, minmax(0, 1fr));
-				grid-template-rows: repeat(12, minmax(0, 1fr));
-				width: min(100%, 220px);
-				aspect-ratio: 4 / 12;
+				grid-template-columns: repeat(10, minmax(0, 1fr));
+				grid-template-rows: repeat(20, minmax(0, 1fr));
+				width: min(100%, 360px);
+				aspect-ratio: 1 / 2;
 				border: 2px solid rgb(var(--black));
 				background: #151820;
 			}
@@ -39,6 +39,11 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 			.board :global(.cell.filled) {
 				border: 1px solid rgba(255, 255, 255, 45%);
 				background: var(--piece-color, #6c63ff);
+			}
+			.board :global(.cell.ghost) {
+				border: 1px solid color-mix(in srgb, var(--piece-color, #6c63ff) 70%, white);
+				background: transparent;
+				opacity: 0.55;
 			}
 			.game-panel {
 				display: grid;
@@ -59,6 +64,13 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				border: 1px solid rgb(var(--gray-light));
 				background: #151820;
 			}
+			.preview-label {
+				margin-bottom: 0.25rem;
+				color: rgb(var(--gray-dark));
+				font-size: 0.7rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
 			.preview-piece :global(.preview-cell) {
 				border: 1px solid rgba(255, 255, 255, 8%);
 			}
@@ -68,6 +80,41 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 			.next-queue {
 				display: grid;
 				gap: 0.4rem;
+			}
+			.mode-picker {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 0.35rem;
+			}
+			.mode-picker button {
+				border: 1px solid rgb(var(--gray-light));
+				background: transparent;
+				color: rgb(var(--black));
+				font: inherit;
+				font-size: 0.75rem;
+				padding: 0.35rem 0.25rem;
+				cursor: pointer;
+			}
+			.mode-picker button[aria-pressed="true"] {
+				background: rgb(var(--black));
+				color: white;
+			}
+			.stats {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 0.45rem;
+			}
+			.stat {
+				border-top: 1px solid rgb(var(--gray-light));
+				padding-top: 0.35rem;
+			}
+			.stat small {
+				display: block;
+				color: rgb(var(--gray-dark));
+				font-size: 0.65rem;
+			}
+			.stat strong {
+				font-variant-numeric: tabular-nums;
 			}
 			.keymap {
 				display: grid;
@@ -99,11 +146,11 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 			}
 			@media (max-width: 420px) {
 				.game-shell {
-					grid-template-columns: minmax(0, 180px) auto;
+					grid-template-columns: minmax(0, 1fr) 126px;
 					gap: 0.5rem;
 				}
 				.board {
-					width: 180px;
+					width: min(100%, 260px);
 				}
 			}
 		</style>
@@ -112,16 +159,26 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		<Header />
 		<main>
 			<section class="game-shell" aria-label="俄罗斯方块游戏">
-				<div class="board" data-board aria-label="游戏棋盘" role="grid"></div>
+				<div class="board" data-board aria-label="游戏棋盘" role="grid" tabindex="0"></div>
 				<aside class="game-panel">
-					<div class="preview-piece" data-hold aria-label="暂存方块"></div>
+					<div><div class="preview-label">Hold</div><div class="preview-piece" data-hold aria-label="暂存方块"></div></div>
 					<div class="next-queue" aria-label="未来四块">
+						<div class="preview-label">Next</div>
 						<div class="preview-piece" data-next-slot></div>
 						<div class="preview-piece" data-next-slot></div>
 						<div class="preview-piece" data-next-slot></div>
 						<div class="preview-piece" data-next-slot></div>
 					</div>
-					<output class="score" data-score aria-label="分数">0</output>
+					<div class="mode-picker" aria-label="游戏模式">
+						<button type="button" data-mode="40l" aria-pressed="true">40L</button>
+						<button type="button" data-mode="marathon" aria-pressed="false">马拉松</button>
+					</div>
+					<div class="stats">
+						<div class="stat"><small>分数</small><strong data-score>0</strong></div>
+						<div class="stat"><small>行数</small><strong data-lines>0</strong></div>
+						<div class="stat"><small>连击</small><strong data-combo>—</strong></div>
+						<div class="stat"><small>时间</small><strong data-time>0:00</strong></div>
+					</div>
 					<div class="keymap" aria-label="按键说明">
 						<div><kbd>← →</kbd><span>移动</span></div>
 						<div><kbd>Z / X</kbd><span>旋转</span></div>
@@ -129,379 +186,57 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 						<div><kbd>Space</kbd><span>硬降</span></div>
 						<div><kbd>C</kbd><span>暂存</span></div>
 						<div><kbd>P / R</kbd><span>暂停 / 重开</span></div>
+						<div><kbd>模式</kbd><span>40L / 马拉松</span></div>
 					</div>
 					<p class="status" data-status aria-live="polite">游戏进行中</p>
 				</aside>
 			</section>
 		</main>
 		<script is:inline>
-			const COLS = 4;
-			const ROWS = 12;
-			const DAS = 140;
-			const ARR = 40;
-			const LOCK_DELAY = 500;
+			const COLS = 10, ROWS = 20, DAS = 140, ARR = 30, LOCK_DELAY = 500, MAX_RESETS = 15;
 			const SHAPES = [
-				{ kind: 'I', color: '#4cc9f0', cells: [[0, 1], [1, 1], [2, 1], [3, 1]] },
-				{ kind: 'O', color: '#f9c74f', cells: [[0, 0], [1, 0], [0, 1], [1, 1]] },
-				{ kind: 'L', color: '#f8961e', cells: [[0, 0], [0, 1], [1, 1], [2, 1]] },
-				{ kind: 'J', color: '#90be6d', cells: [[2, 0], [0, 1], [1, 1], [2, 1]] },
-				{ kind: 'Z', color: '#f94144', cells: [[1, 0], [2, 0], [0, 1], [1, 1]] },
-				{ kind: 'T', color: '#9b5de5', cells: [[1, 0], [0, 1], [1, 1], [2, 1]] },
-				{ kind: 'S', color: '#43aa8b', cells: [[0, 0], [1, 0], [1, 1], [2, 1]] },
+				{ kind: 'I', color: '#4cc9f0', rotations: [[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]],[[0,2],[1,2],[2,2],[3,2]],[[1,0],[1,1],[1,2],[1,3]]] },
+				{ kind: 'O', color: '#f9c74f', rotations: [[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]]] },
+				{ kind: 'T', color: '#9b5de5', rotations: [[[1,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[2,1],[1,2]],[[1,0],[0,1],[1,1],[1,2]]] },
+				{ kind: 'J', color: '#4361ee', rotations: [[[0,0],[0,1],[1,1],[2,1]],[[1,0],[2,0],[1,1],[1,2]],[[0,1],[1,1],[2,1],[2,2]],[[1,0],[1,1],[0,2],[1,2]]] },
+				{ kind: 'L', color: '#f8961e', rotations: [[[2,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,1],[0,2]],[[0,0],[1,0],[1,1],[1,2]]] },
+				{ kind: 'S', color: '#43aa8b', rotations: [[[1,0],[2,0],[0,1],[1,1]],[[1,0],[1,1],[2,1],[2,2]],[[1,1],[2,1],[0,2],[1,2]],[[0,0],[0,1],[1,1],[1,2]]] },
+				{ kind: 'Z', color: '#f94144', rotations: [[[0,0],[1,0],[1,1],[2,1]],[[2,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[1,2],[2,2]],[[1,0],[0,1],[1,1],[0,2]]] },
 			];
-			// SRS kick offsets converted from upward-positive coordinates to screen coordinates.
-			const JLSTZ_KICKS = {
-				'0>1': [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
-				'1>0': [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-				'1>2': [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-				'2>1': [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
-				'2>3': [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-				'3>2': [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-				'3>0': [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-				'0>3': [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-			};
-			const I_KICKS = {
-				'0>1': [[0, 0], [-2, 0], [1, 0], [-2, 1], [1, -2]],
-				'1>0': [[0, 0], [2, 0], [-1, 0], [2, -1], [-1, 2]],
-				'1>2': [[0, 0], [-1, 0], [2, 0], [-1, -2], [2, 1]],
-				'2>1': [[0, 0], [1, 0], [-2, 0], [1, 2], [-2, -1]],
-				'2>3': [[0, 0], [2, 0], [-1, 0], [2, -1], [-1, 2]],
-				'3>2': [[0, 0], [-2, 0], [1, 0], [-2, 1], [1, -2]],
-				'3>0': [[0, 0], [1, 0], [-2, 0], [1, 2], [-2, -1]],
-				'0>3': [[0, 0], [-1, 0], [2, 0], [-1, -2], [2, 1]],
-			};
-			const boardElement = document.querySelector('[data-board]');
-			const holdElement = document.querySelector('[data-hold]');
-			const nextElements = document.querySelectorAll('[data-next-slot]');
-			const scoreElement = document.querySelector('[data-score]');
-			const statusElement = document.querySelector('[data-status]');
-			const cells = [];
-			const previewSlots = [];
-			let board;
-			let current;
-			let pieceQueue;
-			let heldPiece;
-			let canHold;
-			let score;
-			let lines;
-			let paused;
-			let gameOver;
-			let lastDrop;
-			let lockStartedAt;
-			let horizontalDirection;
-			let horizontalRepeatAt;
-			const heldHorizontalKeys = new Set();
-			let animationFrame;
-
-			for (let index = 0; index < COLS * ROWS; index += 1) {
-				const cell = document.createElement('div');
-				cell.className = 'cell';
-				cell.setAttribute('role', 'gridcell');
-				boardElement.append(cell);
-				cells.push(cell);
-			}
-
-			function createPreviewSlot(element) {
-				const slot = { cells: [] };
-				for (let index = 0; index < 8; index += 1) {
-					const cell = document.createElement('div');
-					cell.className = 'preview-cell';
-					element.append(cell);
-					slot.cells.push(cell);
-				}
-				return slot;
-			}
-
-			previewSlots.push(createPreviewSlot(holdElement));
-			nextElements.forEach((element) => previewSlots.push(createPreviewSlot(element)));
-
-			function createPiece(shape) {
-				return { shape, rotation: 0, x: 0, y: 0 };
-			}
-
-			function createBag() {
-				const bag = [...SHAPES];
-				for (let index = bag.length - 1; index > 0; index -= 1) {
-					const swapIndex = Math.floor(Math.random() * (index + 1));
-					[bag[index], bag[swapIndex]] = [bag[swapIndex], bag[index]];
-				}
-				return bag;
-			}
-
-			function refillQueue() {
-				while (pieceQueue.length < 28) pieceQueue.push(...createBag());
-			}
-
-			function renderPreview(slot, shape) {
-				slot.cells.forEach((cell) => {
-					cell.className = 'preview-cell';
-					cell.style.removeProperty('--piece-color');
-				});
-				if (!shape) return;
-				shape.cells.forEach(([x, y]) => {
-					const cell = slot.cells[y * 4 + x];
-					if (cell) {
-						cell.classList.add('filled');
-						cell.style.setProperty('--piece-color', shape.color);
-					}
-				});
-			}
-
-			function renderPreviews() {
-				renderPreview(previewSlots[0], heldPiece);
-				for (let index = 0; index < 4; index += 1) renderPreview(previewSlots[index + 1], pieceQueue[index]);
-			}
-
-			function takeNextPiece() {
-				refillQueue();
-				const shape = pieceQueue.shift();
-				refillQueue();
-				return createPiece(shape);
-			}
-
-			function rotatedCells(piece) {
-				let result = piece.shape.cells.map(([x, y]) => [x, y]);
-				for (let turn = 0; turn < piece.rotation; turn += 1) {
-					result = result.map(([x, y]) => [-y, x]);
-					const minX = Math.min(...result.map(([x]) => x));
-					const minY = Math.min(...result.map(([, y]) => y));
-					result = result.map(([x, y]) => [x - minX, y - minY]);
-				}
-				return result;
-			}
-
-			function canPlace(piece, offsetX = piece.x, offsetY = piece.y, rotation = piece.rotation) {
-				const testPiece = { ...piece, rotation };
-				return rotatedCells(testPiece).every(([x, y]) => {
-					const boardX = offsetX + x;
-					const boardY = offsetY + y;
-					return boardX >= 0 && boardX < COLS && boardY >= 0 && boardY < ROWS && !board[boardY][boardX];
-				});
-			}
-
-			function spawn(piece = takeNextPiece()) {
-				current = piece;
-				current.x = Math.floor((COLS - Math.max(...rotatedCells(current).map(([x]) => x)) - 1) / 2);
-				current.y = 0;
-				canHold = true;
-				if (!canPlace(current)) {
-					gameOver = true;
-					statusElement.textContent = '游戏结束';
-				}
-				renderPreviews();
-			}
-
-			function merge() {
-				rotatedCells(current).forEach(([x, y]) => {
-					board[current.y + y][current.x + x] = current.shape.color;
-				});
-			}
-
-			function clearLines() {
-				const remaining = board.filter((row) => row.some((cell) => !cell));
-				const cleared = ROWS - remaining.length;
-				while (remaining.length < ROWS) remaining.unshift(Array(COLS).fill(''));
-				board = remaining;
-				if (cleared) {
-					lines += cleared;
-					score += [0, 100, 300, 500, 800][cleared] || cleared * 200;
-				}
-			}
-
-			function lockPiece() {
-				merge();
-				clearLines();
-				lockStartedAt = 0;
-				spawn();
-			}
-
-			function isGrounded() {
-				return !canPlace(current, current.x, current.y + 1);
-			}
-
-			function move(dx, dy = 0) {
-				if (paused || gameOver) return false;
-				if (canPlace(current, current.x + dx, current.y + dy)) {
-					current.x += dx;
-					current.y += dy;
-					if (dx) lockStartedAt = 0;
-					return true;
-				}
-				return false;
-			}
-
-			function rotate(direction = 1) {
-				if (paused || gameOver) return;
-				if (current.shape.kind === 'O') return;
-				const rotation = (current.rotation + direction + 4) % 4;
-				const kicks = (current.shape.kind === 'I' ? I_KICKS : JLSTZ_KICKS)[`${current.rotation}>${rotation}`];
-				for (const [offsetX, offsetY] of kicks) {
-					if (canPlace(current, current.x + offsetX, current.y + offsetY, rotation)) {
-						current.x += offsetX;
-						current.y += offsetY;
-						current.rotation = rotation;
-						lockStartedAt = 0;
-						return;
-					}
-				}
-			}
-
-			function drop() {
-				if (paused || gameOver) return;
-				while (move(0, 1)) score += 2;
-				lockPiece();
-				render();
-			}
-
-			function hold() {
-				if (paused || gameOver || !canHold) return;
-				const outgoingShape = current.shape;
-				if (heldPiece) {
-					const incomingShape = heldPiece;
-					heldPiece = outgoingShape;
-					spawn(createPiece(incomingShape));
-				} else {
-					heldPiece = outgoingShape;
-					spawn();
-				}
-				canHold = false;
-				lockStartedAt = 0;
-				renderPreviews();
-			}
-
-			function setHorizontalDirection(direction) {
-				horizontalDirection = direction;
-				move(direction);
-				horizontalRepeatAt = performance.now() + DAS;
-			}
-
-			function updateHeldDirection() {
-				const direction = heldHorizontalKeys.has('ArrowLeft') ? -1 : heldHorizontalKeys.has('ArrowRight') ? 1 : 0;
-				if (direction !== horizontalDirection) {
-					horizontalDirection = direction;
-					if (direction) {
-						move(direction);
-						horizontalRepeatAt = performance.now() + DAS;
-					}
-				}
-			}
-
-			function repeatHorizontalMove(timestamp) {
-				if (!horizontalDirection || timestamp < horizontalRepeatAt) return;
-				move(horizontalDirection);
-				horizontalRepeatAt = timestamp + ARR;
-			}
-
-			function render() {
-				cells.forEach((cell) => {
-					cell.className = 'cell';
-					cell.style.removeProperty('--piece-color');
-				});
-				board.forEach((row, y) => row.forEach((color, x) => {
-					if (color) {
-						cells[y * COLS + x].classList.add('filled');
-						cells[y * COLS + x].style.setProperty('--piece-color', color);
-					}
-				}));
-				if (current && !gameOver) {
-					rotatedCells(current).forEach(([x, y]) => {
-						const cell = cells[(current.y + y) * COLS + current.x + x];
-						if (cell) {
-							cell.classList.add('filled');
-							cell.style.setProperty('--piece-color', current.shape.color);
-						}
-					});
-				}
-				scoreElement.textContent = String(score);
-			}
-
-			function loop(timestamp) {
-				if (!lastDrop) lastDrop = timestamp;
-				if (!paused && !gameOver) {
-					repeatHorizontalMove(timestamp);
-					if (timestamp - lastDrop > Math.max(180, 650 - lines * 25)) {
-						move(0, 1);
-						lastDrop = timestamp;
-					}
-					if (isGrounded()) {
-						if (!lockStartedAt) lockStartedAt = timestamp;
-						else if (timestamp - lockStartedAt >= LOCK_DELAY) lockPiece();
-					} else {
-						lockStartedAt = 0;
-					}
-				}
-				render();
-				animationFrame = requestAnimationFrame(loop);
-			}
-
-			function togglePause() {
-				if (gameOver) return;
-				paused = !paused;
-				statusElement.textContent = paused ? '已暂停' : '游戏进行中';
-			}
-
-			function restart() {
-				board = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
-				score = 0;
-				lines = 0;
-				paused = false;
-				gameOver = false;
-				lastDrop = 0;
-				lockStartedAt = 0;
-				horizontalDirection = 0;
-				horizontalRepeatAt = 0;
-				heldHorizontalKeys.clear();
-				statusElement.textContent = '游戏进行中';
-				pieceQueue = [];
-				heldPiece = null;
-				canHold = true;
-				refillQueue();
-				spawn();
-				render();
-			}
-
-			document.addEventListener('keydown', (event) => {
-				if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'z', 'Z', 'x', 'X', 'c', 'C', 'p', 'P', 'r', 'R'].includes(event.key)) event.preventDefault();
-				if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-					if (!event.repeat) {
-						heldHorizontalKeys.add(event.key);
-						setHorizontalDirection(event.key === 'ArrowLeft' ? -1 : 1);
-					}
-					render();
-					return;
-				}
-				switch (event.key) {
-					case 'ArrowUp': rotate(); break;
-					case 'z':
-					case 'Z': rotate(-1); break;
-					case 'x':
-					case 'X': rotate(1); break;
-					case 'c':
-					case 'C': hold(); break;
-					case 'ArrowDown': move(0, 1); break;
-					case ' ': drop(); break;
-					case 'p':
-					case 'P': togglePause(); break;
-					case 'r':
-					case 'R': restart(); break;
-				}
-				render();
-			});
-
-			document.addEventListener('keyup', (event) => {
-				if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-					heldHorizontalKeys.delete(event.key);
-					updateHeldDirection();
-				}
-			});
-
-			window.addEventListener('blur', () => {
-				heldHorizontalKeys.clear();
-				horizontalDirection = 0;
-			});
-
-			restart();
-			animationFrame = requestAnimationFrame(loop);
+			const JLSTZ_KICKS = {'0>1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'1>0':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'1>2':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'2>1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'2>3':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'3>2':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'3>0':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'0>3':[[0,0],[1,0],[1,-1],[0,2],[1,2]]};
+			const I_KICKS = {'0>1':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]],'1>0':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]],'1>2':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]],'2>1':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]],'2>3':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]],'3>2':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]],'3>0':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]],'0>3':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]]};
+			const boardElement = document.querySelector('[data-board]'), holdElement = document.querySelector('[data-hold]'), nextElements = document.querySelectorAll('[data-next-slot]'), scoreElement = document.querySelector('[data-score]'), linesElement = document.querySelector('[data-lines]'), comboElement = document.querySelector('[data-combo]'), timeElement = document.querySelector('[data-time]'), statusElement = document.querySelector('[data-status]');
+			const cells = [], previewSlots = []; let board, current, pieceQueue, heldPiece, canHold, score, lines, combo, b2b, paused, gameOver, lastDrop, lockStartedAt, lockResets, startTime, mode = '40l', horizontalDirection = 0, horizontalRepeatAt = 0, lastAction = 'spawn'; const heldHorizontalKeys = new Set();
+			for (let i=0;i<COLS*ROWS;i++){const c=document.createElement('div');c.className='cell';c.setAttribute('role','gridcell');boardElement.append(c);cells.push(c);}
+			function createPreviewSlot(element){const slot={cells:[]};for(let i=0;i<8;i++){const c=document.createElement('div');c.className='preview-cell';element.append(c);slot.cells.push(c);}return slot;}
+			previewSlots.push(createPreviewSlot(holdElement)); nextElements.forEach((e)=>previewSlots.push(createPreviewSlot(e)));
+			function createBag(){const bag=[...SHAPES];for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}return bag;}
+			function refillQueue(){while(pieceQueue.length<28)pieceQueue.push(...createBag());}
+			function cellsOf(piece, rotation=piece.rotation){return piece.shape.rotations[rotation];}
+			function createPiece(shape){return {shape,rotation:0,x:3,y:0};}
+			function renderPreview(slot,shape){slot.cells.forEach(c=>{c.className='preview-cell';c.style.removeProperty('--piece-color');});if(!shape)return;shape.rotations[0].forEach(([x,y])=>{const c=slot.cells[y*4+x];if(c){c.classList.add('filled');c.style.setProperty('--piece-color',shape.color);}});}
+			function renderPreviews(){renderPreview(previewSlots[0],heldPiece);for(let i=0;i<4;i++)renderPreview(previewSlots[i+1],pieceQueue[i]);}
+			function canPlace(piece,x=piece.x,y=piece.y,r=piece.rotation){return cellsOf(piece,r).every(([cx,cy])=>{const bx=x+cx,by=y+cy;return bx>=0&&bx<COLS&&by>=0&&by<ROWS&&!board[by][bx];});}
+			function spawn(piece=createPiece(pieceQueue.shift())){refillQueue();current=piece;current.x=piece.shape.kind==='I'?3:4;current.y=0;canHold=true;lockResets=0;lastAction='spawn';if(!canPlace(current)){gameOver=true;statusElement.textContent='游戏结束';}renderPreviews();}
+			function move(dx,dy=0){if(paused||gameOver)return false;if(canPlace(current,current.x+dx,current.y+dy)){current.x+=dx;current.y+=dy;lastAction=dy?'soft':'move';if(lockStartedAt&&lockResets<MAX_RESETS){lockStartedAt=performance.now();lockResets++;}return true;}return false;}
+			function rotate(dir=1){if(paused||gameOver)return false;const next=(current.rotation+dir+4)%4;if(current.shape.kind==='O')return false;const kicks=(current.shape.kind==='I'?I_KICKS:JLSTZ_KICKS)[`${current.rotation}>${next}`];for(const [kx,ky] of kicks){if(canPlace(current,current.x+kx,current.y-ky,next)){current.x+=kx;current.y-=ky;current.rotation=next;lastAction='rotate';if(lockStartedAt&&lockResets<MAX_RESETS){lockStartedAt=performance.now();lockResets++;}return true;}}return false;}
+			function ghostY(){let y=current.y;while(canPlace(current,current.x,y+1))y++;return y;}
+			function isTSpin(){if(current.shape.kind!=='T'||lastAction!=='rotate')return false;const cx=current.x+1,cy=current.y+1;let corners=0;for(const [dx,dy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=cx+dx,y=cy+dy;if(x<0||x>=COLS||y<0||y>=ROWS||board[y][x])corners++;}return corners>=3;}
+			function lockPiece(){const tSpin=isTSpin();cellsOf(current).forEach(([x,y])=>{if(current.y+y>=0)board[current.y+y][current.x+x]=current.shape.color;});board=board.filter(row=>row.some(c=>!c));const cleared=ROWS-board.length;while(board.length<ROWS)board.unshift(Array(COLS).fill(''));if(cleared){lines+=cleared;combo++;const base=tSpin?[0,800,1200,1600][cleared]:[0,100,300,500,800][cleared];score+=base*(b2b&&cleared===4?1.5:1)+(combo>0?50*combo:0);b2b=(cleared===4||tSpin)?true:false;}else combo=-1;lockStartedAt=0;lastAction='lock';if(mode==='40l'&&lines>=40){gameOver=true;statusElement.textContent='40L 完成';return;}spawn();}
+			function hardDrop(){if(paused||gameOver)return;const d=ghostY()-current.y;score+=d*2;current.y+=d;lockPiece();}
+			function hold(){if(paused||gameOver||!canHold)return;const outgoing=current.shape;if(heldPiece){const incoming=heldPiece;heldPiece=outgoing;spawn(createPiece(incoming));}else{heldPiece=outgoing;spawn();}canHold=false;renderPreviews();}
+			function setHorizontalDirection(dir){horizontalDirection=dir;move(dir);horizontalRepeatAt=performance.now()+DAS;}
+			function repeatHorizontalMove(t){if(horizontalDirection&&t>=horizontalRepeatAt){move(horizontalDirection);horizontalRepeatAt=t+ARR;}}
+			function render(){cells.forEach(c=>{c.className='cell';c.style.removeProperty('--piece-color');});board.forEach((row,y)=>row.forEach((color,x)=>{if(color){cells[y*COLS+x].classList.add('filled');cells[y*COLS+x].style.setProperty('--piece-color',color);}}));if(current&&!gameOver){const gy=ghostY();cellsOf(current).forEach(([x,y])=>{const c=cells[(gy+y)*COLS+current.x+x];if(c){c.classList.add('ghost');c.style.setProperty('--piece-color',current.shape.color);}});cellsOf(current).forEach(([x,y])=>{const c=cells[(current.y+y)*COLS+current.x+x];if(c){c.classList.remove('ghost');c.classList.add('filled');c.style.setProperty('--piece-color',current.shape.color);}});}scoreElement.textContent=String(Math.floor(score));linesElement.textContent=String(lines);comboElement.textContent=combo>0?String(combo):'—';timeElement.textContent=formatTime((performance.now()-startTime)/1000);}
+			function formatTime(s){const total=Math.floor(s);return `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`;}
+			function loop(t){if(!lastDrop)lastDrop=t;if(!paused&&!gameOver){repeatHorizontalMove(t);const gravity=mode==='40l'?Math.max(80,700-lines*12):Math.max(100,800-lines*8);if(t-lastDrop>=gravity){move(0,1);lastDrop=t;}if(!canPlace(current,current.x,current.y+1)){if(!lockStartedAt)lockStartedAt=t;else if(t-lockStartedAt>=LOCK_DELAY)lockPiece();}else lockStartedAt=0;}render();requestAnimationFrame(loop);}
+			function togglePause(){if(gameOver)return;paused=!paused;statusElement.textContent=paused?'已暂停':'游戏进行中';}
+			function restart(){board=Array.from({length:ROWS},()=>Array(COLS).fill(''));score=0;lines=0;combo=-1;b2b=false;paused=false;gameOver=false;lastDrop=0;lockStartedAt=0;lockResets=0;horizontalDirection=0;heldHorizontalKeys.clear();startTime=performance.now();statusElement.textContent=mode==='40l'?'40L 进行中':'马拉松进行中';pieceQueue=[];heldPiece=null;canHold=true;refillQueue();spawn();render();}
+			document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));restart();}));
+			document.addEventListener('keydown',(event)=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','z','Z','x','X','c','C','p','P','r','R'].includes(event.key))event.preventDefault();if(event.key==='ArrowLeft'||event.key==='ArrowRight'){if(!event.repeat){heldHorizontalKeys.add(event.key);setHorizontalDirection(event.key==='ArrowLeft'?-1:1);}return;}switch(event.key){case'ArrowUp':case'x':case'X':rotate(1);break;case'z':case'Z':rotate(-1);break;case'c':case'C':hold();break;case'ArrowDown':if(move(0,1))score++;break;case' ':hardDrop();break;case'p':case'P':togglePause();break;case'r':case'R':restart();break;}render();});
+			document.addEventListener('keyup',(event)=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){heldHorizontalKeys.delete(event.key);const dir=heldHorizontalKeys.has('ArrowLeft')?-1:heldHorizontalKeys.has('ArrowRight')?1:0;horizontalDirection=dir;if(dir)horizontalRepeatAt=performance.now()+DAS;}});
+			window.addEventListener('blur',()=>{heldHorizontalKeys.clear();horizontalDirection=0;if(!paused&&!gameOver)togglePause();});
+			restart();requestAnimationFrame(loop);
 		</script>
 		<Footer />
 	</body>
