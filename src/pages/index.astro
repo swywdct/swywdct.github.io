@@ -202,7 +202,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 			</section>
 		</main>
 		<script is:inline>
-			const COLS = 10, ROWS = 20, DAS = 170, ARR = 38, LOCK_DELAY = 500, MAX_RESETS = 15;
+			const COLS = 10, ROWS = 20, DAS = 170, ARR = 38, LOCK_DELAY = 900, MAX_RESETS = 20;
 			const SHAPES = [
 				{ kind: 'I', color: '#4cc9f0', rotations: [[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]],[[0,2],[1,2],[2,2],[3,2]],[[1,0],[1,1],[1,2],[1,3]]] },
 				{ kind: 'O', color: '#f9c74f', rotations: [[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]]] },
@@ -212,8 +212,8 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				{ kind: 'S', color: '#43aa8b', rotations: [[[1,0],[2,0],[0,1],[1,1]],[[1,0],[1,1],[2,1],[2,2]],[[1,1],[2,1],[0,2],[1,2]],[[0,0],[0,1],[1,1],[1,2]]] },
 				{ kind: 'Z', color: '#f94144', rotations: [[[0,0],[1,0],[1,1],[2,1]],[[2,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[1,2],[2,2]],[[1,0],[0,1],[1,1],[0,2]]] },
 			];
-			const JLSTZ_KICKS = {'0>1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'1>0':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'1>2':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'2>1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'2>3':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'3>2':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'3>0':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'0>3':[[0,0],[1,0],[1,-1],[0,2],[1,2]]};
-			const I_KICKS = {'0>1':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]],'1>0':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]],'1>2':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]],'2>1':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]],'2>3':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]],'3>2':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]],'3>0':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]],'0>3':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]]};
+			const JLSTZ_KICKS = {'0>1':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'1>0':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'1>2':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'2>1':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'2>3':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'3>2':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'3>0':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'0>3':[[0,0],[1,0],[1,1],[0,-2],[1,-2]]};
+			const I_KICKS = {'0>1':[[0,0],[-2,0],[1,0],[-2,-1],[1,2]],'1>0':[[0,0],[2,0],[-1,0],[2,1],[-1,-2]],'1>2':[[0,0],[-1,0],[2,0],[-1,2],[2,-1]],'2>1':[[0,0],[1,0],[-2,0],[1,-2],[-2,1]],'2>3':[[0,0],[2,0],[-1,0],[2,1],[-1,-2]],'3>2':[[0,0],[-2,0],[1,0],[-2,-1],[1,2]],'3>0':[[0,0],[1,0],[-2,0],[1,-2],[-2,1]],'0>3':[[0,0],[-1,0],[2,0],[-1,2],[2,-1]]};
 			const boardElement = document.querySelector('[data-board]'), holdElement = document.querySelector('[data-hold]'), nextElements = document.querySelectorAll('[data-next-slot]'), scoreElement = document.querySelector('[data-score]'), linesElement = document.querySelector('[data-lines]'), comboElement = document.querySelector('[data-combo]'), timeElement = document.querySelector('[data-time]'), statusElement = document.querySelector('[data-status]');
 			const cells = [], previewSlots = []; let board, current, pieceQueue, heldPiece, canHold, score, lines, combo, b2b, paused, gameOver, lastDrop, lockStartedAt, lockResets, startTime, mode = '40l', horizontalDirection = 0, horizontalRepeatAt = 0, lastAction = 'spawn'; const heldHorizontalKeys = new Set();
 			for (let i=0;i<COLS*ROWS;i++){const c=document.createElement('div');c.className='cell';c.setAttribute('role','gridcell');boardElement.append(c);cells.push(c);}
